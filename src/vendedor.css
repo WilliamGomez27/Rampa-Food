@@ -1,0 +1,38 @@
+:root { --warn: #b7791f; }
+@media (prefers-color-scheme: dark) { :root { --warn: #e0b04a; } }
+
+.tabs { display: flex; gap: 8px; margin: 12px 0 16px; }
+.tab { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; }
+.tab.on { background: var(--ac); border-color: var(--ac); color: #fff; }
+
+.resumen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.resumen div { border: 1px solid var(--bd); border-radius: 8px; padding: 10px 12px; }
+.resumen small { display: block; font-size: 12px; color: var(--mut); }
+.resumen strong { font-size: 22px; font-weight: 600; }
+
+.fila-turno { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.dia { width: 34px; font-size: 13px; color: var(--mut); flex: none; }
+.franja { flex: 1; min-width: 0; padding: 8px 2px; font-size: 13px; line-height: 1.3; }
+.franja small { display: block; font-size: 12px; color: var(--mut); }
+.franja.on { background: var(--ac); border-color: var(--ac); color: #fff; }
+.franja.on small { color: #fff; }
+
+.grande { width: 100%; height: 72px; font-size: 20px; font-weight: 600; border-radius: 16px; border: none; background: var(--ok); color: #fff; }
+.estado { display: flex; align-items: center; justify-content: center; gap: 10px; height: 72px; border-radius: 16px; border: 1px solid var(--ok); color: var(--ok); font-size: 20px; font-weight: 600; }
+.estado.pausa { border-color: var(--warn); color: var(--warn); }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.punto { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--mut); flex: none; }
+.punto.ok { background: var(--ok); }
+.punto.pausa { background: var(--warn); }
+.vista { display: flex; align-items: center; gap: 8px; border: 1px solid var(--bd); border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+.texto-ok { color: var(--ok); }
+
+.item { display: flex; gap: 12px; align-items: center; border: 1px solid var(--bd); border-radius: 12px; padding: 10px; margin-bottom: 10px; }
+.miniatura { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--bd); flex: none; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--mut); text-align: center; }
+.item .info { flex: 1; min-width: 0; }
+.item .info p { margin: 0; }
+.item .acciones { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.item button, .item label.boton { padding: 6px 10px; font-size: 13px; }
+label.boton { display: inline-block; margin: 0; border: 1px solid var(--bd); border-radius: 8px; color: var(--fg); cursor: pointer; }
+input[type='file'] { display: none; }
+.apagado { color: var(--mut); }

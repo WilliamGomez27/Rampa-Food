@@ -1,0 +1,36 @@
+:root { --warn: #b7791f; }
+@media (prefers-color-scheme: dark) { :root { --warn: #e0b04a; } }
+
+.tab { font-size: 13px; padding: 10px 4px; }
+
+.pedido { border: 1px solid var(--bd); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+.pedido-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.pedido p { margin: 3px 0; font-size: 13px; color: var(--mut); }
+.pedido .titulo { font-size: 15px; font-weight: 600; color: var(--fg); margin: 0; }
+.insignia { font-size: 12px; padding: 3px 10px; border-radius: 999px; font-weight: 600; border: 1px solid var(--bd); color: var(--mut); white-space: nowrap; }
+.insignia.enviado { border-color: var(--warn); color: var(--warn); }
+.insignia.aceptado { border-color: var(--ac); color: var(--ac); }
+.insignia.listo, .insignia.entregado { border-color: var(--ok); color: var(--ok); }
+.insignia.rechazado, .insignia.sin_respuesta { border-color: var(--er); color: var(--er); }
+.acciones-pedido { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.acciones-pedido.una { grid-template-columns: 1fr; }
+.acciones-pedido button { padding: 10px; font-size: 14px; }
+.motivos { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.motivos .chip.on { background: var(--er); border-color: var(--er); }
+
+.pas { display: flex; gap: 12px; align-items: flex-start; }
+.pas-riel { display: flex; flex-direction: column; align-items: center; flex: none; }
+.pas-punto { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bd); box-sizing: border-box; }
+.pas-linea { width: 2px; height: 28px; background: var(--bd); }
+.pas.hecho .pas-punto { background: var(--ok); border-color: var(--ok); }
+.pas.hecho .pas-linea { background: var(--ok); }
+.pas.actual .pas-punto { border-color: var(--ok); }
+.pas-texto { font-size: 14px; margin: 0; color: var(--mut); }
+.pas.hecho .pas-texto, .pas.actual .pas-texto { color: var(--fg); }
+.pas.actual .pas-texto { font-weight: 600; }
+.pas-pista { font-size: 12px; color: var(--mut); margin: 2px 0 0; }
+
+.banner { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--ac); border-radius: 12px; padding: 10px 12px; margin: 12px 0; font-size: 14px; }
+.banner button { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
+.globo { background: var(--bd); border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.5; white-space: pre-line; }
+a.boton-enlace { display: block; text-align: center; padding: 12px; border: 1px solid var(--ac); color: var(--ac); border-radius: 8px; text-decoration: none; margin-top: 12px; }

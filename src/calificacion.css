@@ -1,0 +1,6 @@
+.calif { border: 1px solid var(--bd); border-radius: 12px; padding: 14px; margin-top: 14px; }
+.calif h3 { font-size: 15px; margin: 0 0 8px; }
+.estrellas { display: flex; gap: 2px; margin: 4px 0 10px; }
+.estrellas button { background: none; border: none; padding: 4px; min-width: 0; font-size: 32px; line-height: 1; color: var(--bd); cursor: pointer; }
+.estrellas button.on { color: #e0a82e; }
+.etiquetas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }

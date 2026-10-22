@@ -1,0 +1,6 @@
+.aviso-push { border: 1px solid var(--ac); border-radius: 12px; padding: 12px; margin: 12px 0; }
+.aviso-push p { margin: 0 0 8px; font-size: 14px; }
+.aviso-push .fila { display: flex; gap: 8px; }
+.aviso-push button { padding: 8px 14px; font-size: 14px; }
+.aviso-push button.principal { background: var(--ac); border-color: var(--ac); color: #fff; }
+.aviso-push.alerta { border-color: var(--warn, #b7791f); }

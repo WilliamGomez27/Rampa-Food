@@ -1,0 +1,18 @@
+/* Fondo de la app: la ilustración con un velo encima para que el texto se lea bien */
+:root {
+  --velo: rgba(255, 255, 255, 0.93);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --velo: rgba(27, 27, 27, 0.94);
+  }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(var(--velo), var(--velo)), url('./assets/fondo.webp') center / contain no-repeat, #3834a2;
+}
