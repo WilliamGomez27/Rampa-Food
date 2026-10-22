@@ -26,9 +26,24 @@
 .prod .info p { margin: 0; }
 .prod .agotado { color: var(--mut); }
 .stepper { display: flex; align-items: center; gap: 8px; flex: none; }
-.stepper button { width: 32px; height: 32px; padding: 0; font-size: 16px; }
-.stepper span { min-width: 16px; text-align: center; font-weight: 600; }
-.prod button.agregar { padding: 8px 12px; font-size: 13px; }
+.stepper button { width: 38px; height: 38px; padding: 0; font-size: 18px; font-weight: 600; border-radius: 8px; cursor: pointer; }
+.stepper span { min-width: 20px; text-align: center; font-weight: 600; font-size: 15px; }
+.prod button.agregar { min-height: 40px; min-width: 84px; padding: 8px 14px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; }
+
+.prod-tocado { cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease; }
+.prod-tocado:active { background: rgba(0, 0, 0, 0.03); }
+
+.foto-prod.clickeable { cursor: zoom-in; position: relative; overflow: hidden; transition: transform 0.15s ease; }
+.foto-prod.clickeable:active { transform: scale(0.95); }
+.foto-prod.clickeable img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
+.lupa-icono { position: absolute; right: 2px; bottom: 2px; font-size: 10px; background: rgba(0, 0, 0, 0.65); color: #fff; padding: 1px 3px; border-radius: 3px; line-height: 1; pointer-events: none; }
+
+.modal-foto-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; animation: fadeInFoto 0.18s ease; }
+@keyframes fadeInFoto { from { opacity: 0; } to { opacity: 1; } }
+.modal-foto-caja { background: var(--bg); color: var(--fg); border: 1px solid var(--bd); border-radius: 16px; max-width: 400px; width: 100%; overflow: hidden; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35); position: relative; }
+.modal-foto-img { width: 100%; max-height: 55vh; object-fit: contain; display: block; background: #0a0a0a; }
+.modal-foto-cerrar { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0, 0, 0, 0.65); color: #fff; border: none; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; }
+.modal-foto-info { padding: 16px; }
 
 .barra-total { position: sticky; bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--bd); border-radius: 12px; padding: 12px; margin-top: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
 .barra-total small { display: block; font-size: 12px; color: var(--mut); }

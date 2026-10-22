@@ -333,26 +333,15 @@ create policy sesiones_crear on sesiones_en_linea for insert to authenticated
 create policy sesiones_editar on sesiones_en_linea for update to authenticated
   using (vendedor_id = auth.uid()) with check (vendedor_id = auth.uid());
 
--- Pedidos
+-- Pedidos (solo lectura y actualización de estado; la creación es exclusiva de crear_pedido())
 create policy pedidos_ver on pedidos for select to authenticated
   using (comprador_id = auth.uid() or vendedor_id = auth.uid());
-create policy pedidos_crear on pedidos for insert to authenticated
-  with check (
-    comprador_id = auth.uid()
-    and estado = 'enviado'
-    and entorno_id = mi_entorno()
-    and exists (select 1 from vendedores v
-                where v.id = vendedor_id and v.aprobacion = 'aprobado' and v.entorno_id = pedidos.entorno_id)
-  );
 create policy pedidos_editar on pedidos for update to authenticated
   using (vendedor_id = auth.uid()) with check (vendedor_id = auth.uid());
 
--- Items del pedido
+-- Items del pedido (solo lectura; la inserción es exclusiva de crear_pedido())
 create policy items_ver on pedido_items for select to authenticated
   using (exists (select 1 from pedidos p where p.id = pedido_items.pedido_id));
-create policy items_crear on pedido_items for insert to authenticated
-  with check (exists (select 1 from pedidos p
-                      where p.id = pedido_items.pedido_id and p.comprador_id = auth.uid()));
 
 -- Historial de estados (solo lectura; lo escribe el trigger)
 create policy estados_ver on pedido_estados for select to authenticated

@@ -34,13 +34,20 @@ export default function PedidosEntrantes({ uid }) {
   }, [uid])
 
   useEffect(() => {
-    cargar()
+    let activo = true
+    Promise.resolve().then(() => {
+      if (activo) cargar()
+    })
     const canal = supabase
       .channel('lista-pedidos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => cargar())
       .subscribe()
     const timer = setInterval(cargar, 30000)
-    return () => { supabase.removeChannel(canal); clearInterval(timer) }
+    return () => {
+      activo = false
+      supabase.removeChannel(canal)
+      clearInterval(timer)
+    }
   }, [cargar])
 
   async function cambiar(p, cambios) {

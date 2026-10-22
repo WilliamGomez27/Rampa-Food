@@ -48,6 +48,6 @@ export function alertaSonora() {
       osc.start()
       osc.stop(ctx.currentTime + 0.25)
     }
-  } catch (e) { /* algunos navegadores bloquean el audio sin un toque previo */ }
+  } catch { /* algunos navegadores bloquean el audio sin un toque previo */ }
   if (navigator.vibrate) navigator.vibrate([200, 100, 200])
 }

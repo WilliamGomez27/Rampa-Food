@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
   let datos = {}
   try {
     datos = event.data ? event.data.json() : {}
-  } catch (e) {
+  } catch {
     datos = { title: 'Aviso', body: event.data ? event.data.text() : '' }
   }
   const titulo = datos.title || 'Rampa Food'

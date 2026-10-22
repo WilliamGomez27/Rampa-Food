@@ -91,7 +91,10 @@ export default function Inicio({ uid, onVerMenu }) {
   }, [uid])
 
   useEffect(() => {
-    cargar()
+    let activo = true
+    Promise.resolve().then(() => {
+      if (activo) cargar()
+    })
     // Actualización en vivo cuando un vendedor se conecta, pausa o termina
     const canal = supabase
       .channel('inicio-sesiones')
@@ -99,6 +102,7 @@ export default function Inicio({ uid, onVerMenu }) {
       .subscribe()
     const timer = setInterval(cargar, 60000)
     return () => {
+      activo = false
       supabase.removeChannel(canal)
       clearInterval(timer)
     }

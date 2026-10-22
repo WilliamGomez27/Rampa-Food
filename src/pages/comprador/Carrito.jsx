@@ -9,7 +9,7 @@ const PAGOS = [
 
 export default function Carrito({ carrito, onCambiar, onVolver, onInicio, onContinuar }) {
   const [puntos, setPuntos] = useState([])
-  const [patron, setPatron] = useState('^(100|[1-9][0-9]?|E([1-9]|1[0-9]|2[0-9])|F([1-9]|1[0-9]|20))$')
+  const [patron, setPatron] = useState('^(10[0-7]|[1-9][0-9]?|E([1-9]|1[0-9]|2[0-9])|F([1-9]|1[0-9]|20))$')
   const [puntoId, setPuntoId] = useState('')
   const [posicion, setPosicion] = useState('')
   const [pago, setPago] = useState('')
@@ -32,18 +32,19 @@ export default function Carrito({ carrito, onCambiar, onVolver, onInicio, onCont
 
   // Si el vendedor sale de turno mientras armas el pedido, se avisa aquí
   useEffect(() => {
-    if (!vendedor) return
+    const vendedorId = vendedor?.id
+    if (!vendedorId) return
     async function revisar() {
       const { data } = await supabase
         .from('sesiones_en_linea').select('estado')
-        .eq('vendedor_id', vendedor.id).is('fin_real', null).maybeSingle()
+        .eq('vendedor_id', vendedorId).is('fin_real', null).maybeSingle()
       setEnLinea(data?.estado === 'en_linea')
     }
     revisar()
     const canal = supabase
-      .channel('carrito-' + vendedor.id)
+      .channel('carrito-' + vendedorId)
       .on('postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'sesiones_en_linea', filter: `vendedor_id=eq.${vendedor.id}` },
+        { event: 'UPDATE', schema: 'public', table: 'sesiones_en_linea', filter: `vendedor_id=eq.${vendedorId}` },
         () => revisar())
       .subscribe()
     return () => supabase.removeChannel(canal)
@@ -70,7 +71,7 @@ export default function Carrito({ carrito, onCambiar, onVolver, onInicio, onCont
     let pos = ''
     if (punto?.es_posicion) {
       pos = posicion.trim().toUpperCase()
-      if (!posicionValida(pos)) return setError('Escribe tu posición: un número del 1 al 100, o E1 a E29, F1 a F20')
+      if (!posicionValida(pos)) return setError('Escribe tu posición: un número del 1 al 107, o E1 a E29, F1 a F20')
     }
     if (!pago) return setError('Elige la forma de pago')
 
@@ -132,7 +133,7 @@ export default function Carrito({ carrito, onCambiar, onVolver, onInicio, onCont
             onChange={(e) => { setPosicion(e.target.value); setError('') }}
             placeholder="Ej: 45, E12 o F7"
           />
-          <p className="sub" style={{ margin: '6px 0 0', fontSize: 12 }}>Un número del 1 al 100, o E1 a E29, F1 a F20.</p>
+          <p className="sub" style={{ margin: '6px 0 0', fontSize: 12 }}>Un número del 1 al 107, o E1 a E29, F1 a F20.</p>
         </>
       )}
 

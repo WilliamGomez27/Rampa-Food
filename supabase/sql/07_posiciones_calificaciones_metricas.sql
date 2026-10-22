@@ -26,19 +26,19 @@ select e.id, 'Escribir mi posición', true
 from entornos e
 where not exists (select 1 from puntos_entrega p where p.entorno_id = e.id and p.es_posicion);
 
--- Posiciones válidas: del 1 al 100, de E1 a E29 y de F1 a F20 (se compara en mayúsculas)
+-- Posiciones válidas: del 1 al 107, de E1 a E29 y de F1 a F20 (se compara en mayúsculas)
 insert into configuracion (entorno_id, clave, valor)
-select id, 'patron_posicion', '^(100|[1-9][0-9]?|E([1-9]|1[0-9]|2[0-9])|F([1-9]|1[0-9]|20))$' from entornos
+select id, 'patron_posicion', '^(10[0-7]|[1-9][0-9]?|E([1-9]|1[0-9]|2[0-9])|F([1-9]|1[0-9]|20))$' from entornos
 on conflict (entorno_id, clave) do update set valor = excluded.valor;
 
--- 2) crear_pedido: ahora recibe la posición y la valida
+-- 2) crear_pedido: ahora recibe la posición, la valida y es SECURITY DEFINER
 drop function if exists crear_pedido(uuid, uuid, text, text, jsonb);
 
 create or replace function crear_pedido(
   p_vendedor uuid, p_punto uuid, p_pago text, p_nota text, p_items jsonb,
   p_posicion text default null
 ) returns jsonb
-language plpgsql set search_path = public as $$
+language plpgsql security definer set search_path = public as $$
 declare
   v_entorno uuid := mi_entorno();
   v_total integer := 0;
@@ -79,7 +79,7 @@ begin
     v_pos := upper(trim(coalesce(p_posicion, '')));
     select coalesce(
       (select valor from configuracion where entorno_id = v_entorno and clave = 'patron_posicion'),
-      '^(100|[1-9][0-9]?|E([1-9]|1[0-9]|2[0-9])|F([1-9]|1[0-9]|20))$') into v_patron;
+      '^(10[0-7]|[1-9][0-9]?|E([1-9]|1[0-9]|2[0-9])|F([1-9]|1[0-9]|20))$') into v_patron;
     if v_pos !~ v_patron then raise exception 'posicion_invalida'; end if;
   end if;
 
@@ -107,6 +107,11 @@ end $$;
 
 revoke execute on function crear_pedido(uuid, uuid, text, text, jsonb, text) from public, anon;
 grant execute on function crear_pedido(uuid, uuid, text, text, jsonb, text) to authenticated;
+
+-- 2b) Seguridad: solo se pueden crear pedidos mediante la función crear_pedido()
+-- Se eliminan las políticas de inserción directa para evitar que se evada el cálculo de precios y stock
+drop policy if exists pedidos_crear on pedidos;
+drop policy if exists items_crear on pedido_items;
 
 -- La posición también queda protegida contra cambios (se amplía el control del pedido)
 create or replace function validar_cambio_pedido() returns trigger

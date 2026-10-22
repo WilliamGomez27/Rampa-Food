@@ -4,18 +4,19 @@ export const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 export const FRANJAS = [
   { clave: 'manana', nombre: 'Mañana', inicio: '04:00', fin: '12:00', horas: 8 },
   { clave: 'tarde', nombre: 'Tarde', inicio: '12:00', fin: '20:00', horas: 8 },
-  { clave: 'noche', nombre: 'Noche', inicio: '20:00', fin: '28:00', horas: 8 },
+  { clave: 'noche', nombre: 'Noche', inicio: '20:00', fin: '04:00', horas: 8 },
 ]
 
 // 1 = lunes ... 7 = domingo
-export function diaHoy() {
-  return ((new Date().getDay() + 6) % 7) + 1
+export function diaHoy(d = new Date()) {
+  return ((d.getDay() + 6) % 7) + 1
 }
 
 export function hora12(t) {
   const [h, m] = t.split(':').map(Number)
-  const sufijo = h >= 12 ? 'pm' : 'am'
-  const h12 = h % 12 === 0 ? 12 : h % 12
+  const realH = h % 24
+  const sufijo = (realH >= 12 && realH < 24) || (h >= 12 && h < 24) ? 'pm' : 'am'
+  const h12 = realH % 12 === 0 ? 12 : realH % 12
   return `${h12}:${String(m).padStart(2, '0')} ${sufijo}`
 }
 
@@ -23,15 +24,36 @@ export function precioTexto(p) {
   return '$' + Math.round(p).toLocaleString('es-CO')
 }
 
-// Devuelve el turno de hoy que contiene la hora actual (o null)
-export function ahoraEnFranja(turnosHoy) {
-  const d = new Date()
+// Devuelve el turno activo considerando turnos diurnos y nocturnos (cruce de medianoche)
+export function ahoraEnFranja(turnos, dia = diaHoy(), d = new Date()) {
   const min = d.getHours() * 60 + d.getMinutes()
+  const diaAyer = dia === 1 ? 7 : dia - 1
+
   return (
-    turnosHoy.find((t) => {
-      const [h1, m1] = t.hora_inicio.split(':').map(Number)
-      const [h2, m2] = t.hora_fin.split(':').map(Number)
-      return min >= h1 * 60 + m1 && min < h2 * 60 + m2
+    turnos.find((t) => {
+      const hInicio = t.hora_inicio || t.inicio
+      const hFin = t.hora_fin || t.fin
+      if (!hInicio || !hFin) return false
+      const [h1, m1] = hInicio.split(':').map(Number)
+      const [h2, m2] = hFin.split(':').map(Number)
+      const inicioMin = h1 * 60 + m1
+      const finMin = h2 * 60 + m2
+      const cruzaMedianoche = finMin > 1440 || finMin <= inicioMin
+      const finDiaSiguiente = finMin > 1440 ? finMin - 1440 : finMin
+
+      if (t.dia_semana === undefined) {
+        if (cruzaMedianoche) return min >= inicioMin || min < finDiaSiguiente
+        return min >= inicioMin && min < finMin
+      }
+
+      if (t.dia_semana === dia) {
+        if (cruzaMedianoche) return min >= inicioMin
+        return min >= inicioMin && min < finMin
+      }
+      if (t.dia_semana === diaAyer && cruzaMedianoche) {
+        return min < finDiaSiguiente
+      }
+      return false
     }) ?? null
   )
 }

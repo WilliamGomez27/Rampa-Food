@@ -103,8 +103,12 @@ begin
            and (
              s2.inicio_real < now() - interval '12 hours'
              or (t.id is not null and (
-                  (s2.inicio_real at time zone 'America/Bogota')::date < (now() at time zone 'America/Bogota')::date
-                  or (now() at time zone 'America/Bogota')::time >= t.hora_fin
+               case
+                 when t.hora_inicio < t.hora_fin then
+                   (now() at time zone 'America/Bogota') >= ((s2.inicio_real at time zone 'America/Bogota')::date + t.hora_fin)
+                 else
+                   (now() at time zone 'America/Bogota') >= ((s2.inicio_real at time zone 'America/Bogota')::date + interval '1 day' + t.hora_fin)
+               end
              ))
            )
       ) v

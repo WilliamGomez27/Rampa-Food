@@ -24,7 +24,7 @@ export default function MisTurnos({ uid }) {
 
   function alternar(k) {
     const n = new Set(sel)
-    n.has(k) ? n.delete(k) : n.add(k)
+    if (n.has(k)) n.delete(k); else n.add(k)
     setSel(n)
     setMsg({ tipo: '', texto: '' })
   }

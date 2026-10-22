@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../supabase'
 import { precioTexto, subirFoto } from '../../lib/utils'
 
@@ -10,17 +10,55 @@ export default function MiMenu({ uid }) {
   const [precio, setPrecio] = useState('')
   const [archivo, setArchivo] = useState(null)
   const [claveArchivo, setClaveArchivo] = useState(0)
+  const [previewUrl, setPreviewUrl] = useState(null)
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
 
-  async function cargar() {
+  function elegirArchivo(file) {
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setArchivo(file || null)
+    setPreviewUrl(file ? URL.createObjectURL(file) : null)
+  }
+
+  function limpiarArchivo() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setArchivo(null)
+    setPreviewUrl(null)
+    setClaveArchivo((c) => c + 1)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  const cargar = useCallback(async () => {
     const { data } = await supabase
       .from('productos').select('*')
       .eq('vendedor_id', uid).eq('activo', true).order('creado_en')
     setProductos(data || [])
     setCargando(false)
-  }
-  useEffect(() => { cargar() }, [uid])
+  }, [uid])
+
+  useEffect(() => {
+    let activo = true
+    supabase
+      .from('productos')
+      .select('*')
+      .eq('vendedor_id', uid)
+      .eq('activo', true)
+      .order('creado_en')
+      .then(({ data }) => {
+        if (activo) {
+          setProductos(data || [])
+          setCargando(false)
+        }
+      })
+    return () => {
+      activo = false
+    }
+  }, [uid])
 
   async function agregar() {
     const valor = Number(precio)
@@ -37,8 +75,8 @@ export default function MiMenu({ uid }) {
         precio: Math.round(valor), foto_url,
       })
       if (e) throw e
-      setNombre(''); setDescripcion(''); setPrecio(''); setArchivo(null)
-      setClaveArchivo((n) => n + 1)
+      setNombre(''); setDescripcion(''); setPrecio('')
+      limpiarArchivo()
       await cargar()
     } catch (e) {
       console.error(e)
@@ -86,10 +124,16 @@ export default function MiMenu({ uid }) {
             <div className="acciones">
               <button onClick={() => alternarAgotado(p)}>{p.agotado ? 'Marcar disponible' : 'Marcar agotado'}</button>
               {!p.foto_url && (
-                <label className="boton">
-                  Subir foto
-                  <input type="file" accept="image/*" onChange={(e) => ponerFoto(p, e.target.files[0])} />
-                </label>
+                <div style={{ display: 'inline-flex', gap: 6 }}>
+                  <label className="boton" title="Tomar foto con cámara" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    📷 Foto
+                    <input type="file" accept="image/*" capture="environment" onChange={(e) => ponerFoto(p, e.target.files[0])} />
+                  </label>
+                  <label className="boton" title="Elegir de galería" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    🖼️ Galería
+                    <input type="file" accept="image/*" onChange={(e) => ponerFoto(p, e.target.files[0])} />
+                  </label>
+                </div>
               )}
               <button onClick={() => quitar(p)}>Quitar</button>
             </div>
@@ -105,10 +149,48 @@ export default function MiMenu({ uid }) {
         <input id="dp" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Con arroz aparte" />
         <label htmlFor="pp">Precio</label>
         <input id="pp" type="number" min="0" step="500" value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="8000" />
-        <label className="boton" style={{ marginTop: 14, padding: '10px 14px' }}>
-          {archivo ? 'Foto lista: ' + archivo.name.slice(0, 18) : 'Subir foto'}
-          <input key={claveArchivo} type="file" accept="image/*" onChange={(e) => setArchivo(e.target.files[0] || null)} />
-        </label>
+        <label style={{ display: 'block', marginTop: 14, marginBottom: 6, fontSize: 13, fontWeight: 600 }}>Foto del producto</label>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <label className="boton" style={{ flex: 1, textAlign: 'center', padding: '12px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer' }}>
+            <span style={{ fontSize: 18 }}>📷</span>
+            <span style={{ fontWeight: 600, fontSize: 13 }}>Tomar foto</span>
+            <input
+              key={`cam-${claveArchivo}`}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => elegirArchivo(e.target.files?.[0])}
+            />
+          </label>
+          <label className="boton" style={{ flex: 1, textAlign: 'center', padding: '12px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer' }}>
+            <span style={{ fontSize: 18 }}>🖼️</span>
+            <span style={{ fontWeight: 600, fontSize: 13 }}>Galería</span>
+            <input
+              key={`gal-${claveArchivo}`}
+              type="file"
+              accept="image/*"
+              onChange={(e) => elegirArchivo(e.target.files?.[0])}
+            />
+          </label>
+        </div>
+
+        {previewUrl && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12, padding: 10, border: '1px solid var(--bd)', borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
+            <img src={previewUrl} alt="Vista previa" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, flex: 'none', border: '1px solid var(--bd)' }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{archivo.name}</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--ok)' }}>✓ Foto lista para subir ({(archivo.size / 1024).toFixed(0)} KB)</p>
+            </div>
+            <button
+              type="button"
+              onClick={limpiarArchivo}
+              style={{ padding: '6px 10px', fontSize: 12, border: '1px solid var(--bd)', borderRadius: 6, background: 'transparent', color: 'var(--mut)', cursor: 'pointer' }}
+            >
+              Quitar
+            </button>
+          </div>
+        )}
+
         <p className="error">{error}</p>
         <button className="primario" style={{ marginTop: 6 }} onClick={agregar}>{guardando ? 'Guardando…' : 'Agregar producto'}</button>
       </div>

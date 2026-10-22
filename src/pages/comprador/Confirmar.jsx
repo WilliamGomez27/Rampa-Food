@@ -9,7 +9,7 @@ function traducir(msg = '') {
   if (msg.includes('punto_invalido')) return 'El punto de entrega ya no está disponible. Elige otro.'
   if (msg.includes('demasiados_pedidos')) return 'Ya tienes 2 pedidos en curso. Espera a que termine uno para pedir otro.'
   if (msg.includes('nombre_requerido')) return 'Escribe tu nombre para que el vendedor sepa para quién es.'
-  if (msg.includes('posicion_invalida')) return 'Escribe tu posición: un número del 1 al 100, o E1 a E29, F1 a F20.'
+  if (msg.includes('posicion_invalida')) return 'Escribe tu posición: un número del 1 al 107, o E1 a E29, F1 a F20.'
   return 'No pudimos enviar tu pedido. Intenta de nuevo.'
 }
 

@@ -10,8 +10,10 @@ export default function EstoyEnLinea({ uid }) {
 
   useEffect(() => {
     ; (async () => {
+      const hoy = diaHoy()
+      const ayer = hoy === 1 ? 7 : hoy - 1
       const [{ data: t }, { data: s }] = await Promise.all([
-        supabase.from('turnos').select('*').eq('vendedor_id', uid).eq('dia_semana', diaHoy()).order('hora_inicio'),
+        supabase.from('turnos').select('*').eq('vendedor_id', uid).in('dia_semana', [ayer, hoy]).order('hora_inicio'),
         supabase.from('sesiones_en_linea').select('*').eq('vendedor_id', uid).is('fin_real', null).maybeSingle(),
       ])
       setTurnos(t || [])
@@ -41,16 +43,19 @@ export default function EstoyEnLinea({ uid }) {
   if (cargando) return <p className="msg">Cargando…</p>
 
   const estado = sesion ? sesion.estado : 'fuera'
-  const fueraDeTurno = !ahoraEnFranja(turnos)
+  const turnoActivo = ahoraEnFranja(turnos)
+  const fueraDeTurno = !turnoActivo
+  const hoy = diaHoy()
+  const turnosVisibles = turnos.filter((t) => t.dia_semana === hoy || t.id === turnoActivo?.id)
 
   return (
     <div>
       <div className="tarjeta" style={{ marginTop: 0 }}>
         <p className="sub" style={{ margin: 0 }}>Tu turno de hoy</p>
-        {turnos.length === 0 ? (
+        {turnosVisibles.length === 0 ? (
           <strong>Hoy no tienes turnos programados</strong>
         ) : (
-          turnos.map((t) => (
+          turnosVisibles.map((t) => (
             <p key={t.id} style={{ margin: '4px 0 0', fontWeight: 600 }}>
               {FRANJAS.find((f) => f.clave === t.franja)?.nombre} · {hora12(t.hora_inicio)} a {hora12(t.hora_fin)}
             </p>

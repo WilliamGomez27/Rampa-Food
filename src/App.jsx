@@ -40,7 +40,6 @@ export default function App() {
   async function entrarAnonimo() {
     if (entrando.current) return
     entrando.current = true
-    setErrorEntrada('')
     const { error } = await supabase.auth.signInAnonymously()
     if (error) {
       console.error(error)
@@ -51,16 +50,17 @@ export default function App() {
 
   useEffect(() => {
     if (session === undefined) return
-    if (session === null && !modoCuenta) entrarAnonimo()
+    if (session === null && !modoCuenta) {
+      void Promise.resolve().then(() => entrarAnonimo())
+    }
     if (session && esAnonimo && modoCuenta) supabase.auth.signOut()
-  }, [session, modoCuenta])
+  }, [session, modoCuenta, esAnonimo])
 
   // Administrador: se verifica en el servidor
   useEffect(() => {
     if (!modoAdmin || !session || esAnonimo) return
-    setEsAdmin(null)
     supabase.rpc('es_admin').then(({ data }) => setEsAdmin(data === true))
-  }, [modoAdmin, uid])
+  }, [modoAdmin, session, esAnonimo])
 
   async function cargarPerfil(id, anonimo) {
     const { data: v } = await supabase.from('vendedores').select('*').eq('id', id).maybeSingle()
@@ -85,10 +85,9 @@ export default function App() {
 
   useEffect(() => {
     if (uid) {
-      setPerfil(undefined)
-      cargarPerfil(uid, esAnonimo)
+      void Promise.resolve().then(() => cargarPerfil(uid, esAnonimo))
     }
-  }, [uid])
+  }, [uid, esAnonimo])
 
   const salir = () => supabase.auth.signOut()
 

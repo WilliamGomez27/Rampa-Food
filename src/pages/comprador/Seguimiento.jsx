@@ -25,7 +25,10 @@ export default function Seguimiento({ pedido, onInicio }) {
   }, [pedido.id])
 
   useEffect(() => {
-    cargar()
+    let activo = true
+    Promise.resolve().then(() => {
+      if (activo) cargar()
+    })
     supabase.from('configuracion').select('valor').eq('clave', 'minutos_respuesta').maybeSingle()
       .then(({ data }) => { if (data) setLimite(Number(data.valor) || 10) })
     const canal = supabase
@@ -35,7 +38,7 @@ export default function Seguimiento({ pedido, onInicio }) {
         () => cargar())
       .subscribe()
     const timer = setInterval(cargar, 30000) // respaldo por si se pierde la conexión
-    return () => { supabase.removeChannel(canal); clearInterval(timer) }
+    return () => { activo = false; supabase.removeChannel(canal); clearInterval(timer) }
   }, [pedido.id, cargar])
 
   const entregado = p?.estado === 'entregado'

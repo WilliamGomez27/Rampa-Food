@@ -5,16 +5,35 @@ import { precioTexto } from '../../lib/utils'
 export default function MenuVendedor({ vendedor, carrito, onCambiar, onVolver, onVerCarrito }) {
   const [productos, setProductos] = useState([])
   const [cargando, setCargando] = useState(true)
+  const [fotoModal, setFotoModal] = useState(null)
 
   useEffect(() => {
-    ;(async () => {
-      const { data } = await supabase
-        .from('productos').select('*')
-        .eq('vendedor_id', vendedor.id).eq('activo', true).order('creado_en')
-      setProductos(data || [])
-      setCargando(false)
-    })()
+    let activo = true
+    supabase
+      .from('productos')
+      .select('*')
+      .eq('vendedor_id', vendedor.id)
+      .eq('activo', true)
+      .order('creado_en')
+      .then(({ data }) => {
+        if (activo) {
+          setProductos(data || [])
+          setCargando(false)
+        }
+      })
+    return () => {
+      activo = false
+    }
   }, [vendedor.id])
+
+  useEffect(() => {
+    if (!fotoModal) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') setFotoModal(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [fotoModal])
 
   const mismo = carrito.vendedor?.id === vendedor.id
   const items = mismo ? carrito.items : {}
@@ -40,8 +59,28 @@ export default function MenuVendedor({ vendedor, carrito, onCambiar, onVolver, o
       {productos.map((p) => {
         const c = items[p.id]?.cantidad || 0
         return (
-          <div className="prod" key={p.id}>
-            {p.foto_url ? <img className="foto-prod" src={p.foto_url} alt={p.nombre} /> : <div className="foto-prod">Sin foto</div>}
+          <div
+            className={`prod ${!p.agotado && c === 0 ? 'prod-tocado' : ''}`}
+            key={p.id}
+            onClick={() => {
+              if (!p.agotado && c === 0) onCambiar(vendedor, p, 1)
+            }}
+          >
+            {p.foto_url ? (
+              <div
+                className="foto-prod clickeable"
+                title="Toca para ampliar imagen"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setFotoModal(p)
+                }}
+              >
+                <img src={p.foto_url} alt={p.nombre} />
+                <span className="lupa-icono" aria-hidden="true">🔍</span>
+              </div>
+            ) : (
+              <div className="foto-prod">Sin foto</div>
+            )}
             <div className="info">
               <p className={p.agotado ? 'agotado' : ''} style={{ fontWeight: 600, fontSize: 15 }}>{p.nombre}</p>
               {p.descripcion && <p className="sub" style={{ margin: '2px 0 0', fontSize: 12 }}>{p.descripcion}</p>}
@@ -50,9 +89,17 @@ export default function MenuVendedor({ vendedor, carrito, onCambiar, onVolver, o
             {p.agotado ? (
               <span className="sub" style={{ margin: 0, fontSize: 12 }}>Agotado</span>
             ) : c === 0 ? (
-              <button className="agregar" onClick={() => onCambiar(vendedor, p, 1)}>Agregar</button>
+              <button
+                className="agregar"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onCambiar(vendedor, p, 1)
+                }}
+              >
+                Agregar
+              </button>
             ) : (
-              <div className="stepper">
+              <div className="stepper" onClick={(e) => e.stopPropagation()}>
                 <button aria-label="Quitar uno" onClick={() => onCambiar(vendedor, p, -1)}>−</button>
                 <span>{c}</span>
                 <button aria-label="Sumar uno" onClick={() => onCambiar(vendedor, p, 1)}>+</button>
@@ -61,6 +108,74 @@ export default function MenuVendedor({ vendedor, carrito, onCambiar, onVolver, o
           </div>
         )
       })}
+
+      {fotoModal && (
+        <div
+          className="modal-foto-overlay"
+          onClick={() => setFotoModal(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="modal-foto-caja" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-foto-cerrar"
+              onClick={() => setFotoModal(null)}
+              aria-label="Cerrar vista previa"
+            >
+              ✕
+            </button>
+            <img
+              className="modal-foto-img"
+              src={fotoModal.foto_url}
+              alt={fotoModal.nombre}
+            />
+            <div className="modal-foto-info">
+              <h3 style={{ margin: '0 0 6px', fontSize: 18 }}>{fotoModal.nombre}</h3>
+              {fotoModal.descripcion && (
+                <p className="sub" style={{ margin: '0 0 10px', fontSize: 13 }}>
+                  {fotoModal.descripcion}
+                </p>
+              )}
+              <p style={{ fontWeight: 700, fontSize: 18, margin: '0 0 14px' }}>
+                {precioTexto(fotoModal.precio)}
+              </p>
+
+              {fotoModal.agotado ? (
+                <p className="sub" style={{ margin: 0, fontWeight: 600 }}>Producto agotado</p>
+              ) : (items[fotoModal.id]?.cantidad || 0) === 0 ? (
+                <button
+                  className="primario"
+                  style={{ width: '100%', padding: '12px', fontSize: 15 }}
+                  onClick={() => {
+                    onCambiar(vendedor, fotoModal, 1)
+                  }}
+                >
+                  + Agregar al pedido ({precioTexto(fotoModal.precio)})
+                </button>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>En tu pedido:</span>
+                  <div className="stepper">
+                    <button
+                      aria-label="Quitar uno"
+                      onClick={() => onCambiar(vendedor, fotoModal, -1)}
+                    >
+                      −
+                    </button>
+                    <span style={{ fontSize: 16 }}>{items[fotoModal.id].cantidad}</span>
+                    <button
+                      aria-label="Sumar uno"
+                      onClick={() => onCambiar(vendedor, fotoModal, 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {cantidad > 0 && (
         <div className="barra-total">

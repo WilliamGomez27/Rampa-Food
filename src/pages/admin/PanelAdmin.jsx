@@ -51,7 +51,15 @@ export default function PanelAdmin({ onSalir }) {
     setCargando(false)
   }, [])
 
-  useEffect(() => { cargar(dias) }, [dias, cargar])
+  useEffect(() => {
+    let activo = true
+    Promise.resolve().then(() => {
+      if (activo) cargar(dias)
+    })
+    return () => {
+      activo = false
+    }
+  }, [dias, cargar])
 
   const css = getComputedStyle(document.documentElement)
   const texto = css.getPropertyValue('--fg').trim() || '#333'
