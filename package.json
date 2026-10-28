@@ -2,6 +2,13 @@
   "name": "Rampa-food",
   "private": true,
   "version": "0.8.5",
+  "description": "Rampa Food - Aplicación PWA para gestión de alimentos y bebidas en turnos rotativos. Software propietario.",
+  "author": "William Alexander Gomez <gwilliamalexander@gmail.com>",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WilliamGomez27/Rampa-Food.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -16,6 +16,7 @@ Permite a los compradores ordenar de forma inmediata sin necesidad de crear cuen
 - [Base de Datos y Supabase](#-base-de-datos-y-supabase)
 - [Notificaciones Push y PWA](#-notificaciones-push-y-pwa)
 - [Scripts Disponibles](#-scripts-disponibles)
+- [Autoría, Licencia y Uso para Pruebas](#-autoría-licencia-y-uso-para-pruebas)
 
 ---
 
@@ -209,3 +210,16 @@ Los esquemas SQL se encuentran en `supabase/sql/`. Deben ejecutarse en orden asc
 - `npm run build`: Genera el bundle de producción optimizado en la carpeta `dist/`.
 - `npm run preview`: Levanta un servidor local para inspeccionar la versión de producción antes de desplegar.
 - `npm run lint`: Ejecuta el linter ultrarrápido [oxlint](https://oxc.rs/) para validar buenas prácticas y detectar errores.
+
+---
+
+## ⚖️ Autoría, Licencia y Uso para Pruebas
+
+**Rampa Food** es un desarrollo original y propiedad intelectual exclusiva de **William Alexander Gómez**.
+
+- **Autor y Titular de Derechos:** William Alexander Gómez ([@WilliamGomez27](https://github.com/WilliamGomez27))
+- **Contacto de Autoría:** `gwilliamalexander@gmail.com`
+- **Licencia:** Software Propietario (Todos los derechos reservados / All Rights Reserved).
+- **Acceso para Evaluadores y Testers:** Se concede acceso y autorización exclusiva a usuarios y evaluadores para interactuar, operar y verificar las capacidades de la plataforma en entornos de prueba y producción.
+- **Restricciones:** Queda estrictamente prohibida la copia, clonación, reempaquetado, distribución, ingeniería inversa o explotación comercial no autorizada del código fuente, bases de datos o diseño de esta aplicación. Consulte el archivo [LICENSE](LICENSE) para más detalles.
+
